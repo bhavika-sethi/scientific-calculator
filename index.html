@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scientific Calculator</title>
+  <meta name="description" content="A beautiful, feature-rich scientific calculator with login support." />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <!-- ══ LOGIN / SIGNUP MODAL — always shown when logged out ══ -->
+  <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+
+      <!-- Close button: only visible once already authenticated (e.g. re-opened) -->
+      <button class="modal-close hidden" id="closeModal" aria-label="Close">✕</button>
+
+      <div class="modal-logo">🔐</div>
+
+      <!-- Tab bar -->
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabLogin"  data-tab="login">Sign In</button>
+        <button class="modal-tab"        id="tabSignup" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- ── Sign In panel ── -->
+      <div id="panelLogin">
+        <h2 id="modalTitle">Welcome Back</h2>
+        <p class="modal-sub">Sign in to use the calculator</p>
+
+        <div class="input-group">
+          <span class="input-icon">✉</span>
+          <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        </div>
+
+        <button id="loginSubmit">Sign In</button>
+        <p id="loginMsg" class="auth-msg"></p>
+      </div>
+
+      <!-- ── Sign Up panel ── -->
+      <div id="panelSignup" class="hidden">
+        <h2>Create Account</h2>
+        <p class="modal-sub">Join to unlock the calculator</p>
+
+        <div class="input-group">
+          <span class="input-icon">✉</span>
+          <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password" />
+        </div>
+
+        <button id="signupSubmit">Create Account</button>
+        <p id="signupMsg" class="auth-msg"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Main App (hidden until authenticated) ── -->
+  <div class="app-wrapper hidden" id="appWrapper">
+
+    <!-- ── Header ── -->
+    <header>
+      <h1>🧮 Sci Calc</h1>
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <span id="userInfo"></span>
+        <button id="logoutBtn" class="auth-btn logout-btn">Logout</button>
+      </div>
+    </header>
+
+    <!-- ── Calculator ── -->
+    <div class="calculator">
+
+      <!-- Display -->
+      <div class="display-wrapper">
+        <span id="angleBadge">DEG</span>
+        <div id="history"></div>
+        <input type="text" id="display" readonly placeholder="0" />
+      </div>
+
+      <!-- Buttons -->
+      <div class="buttons">
+
+        <!-- Row 1: Functions -->
+        <button class="btn func" id="btn-sin"    data-value="sin">sin</button>
+        <button class="btn func" id="btn-cos"    data-value="cos">cos</button>
+        <button class="btn func" id="btn-tan"    data-value="tan">tan</button>
+        <button class="btn func" id="btn-toggle" data-value="toggleAngle">Deg/Rad</button>
+
+        <!-- Row 2: Functions -->
+        <button class="btn func" id="btn-log"   data-value="log">log₁₀</button>
+        <button class="btn func" id="btn-ln"    data-value="ln">ln</button>
+        <button class="btn func" id="btn-fact"  data-value="fact">n!</button>
+        <button class="btn func" id="btn-pow2"  data-value="pow2">x²</button>
+
+        <!-- Row 3: Functions + Operators -->
+        <button class="btn func" id="btn-sqrt"  data-value="sqrt">√</button>
+        <button class="btn func" id="btn-pow"   data-value="pow">xʸ</button>
+        <button class="btn func" id="btn-pi"    data-value="pi">π</button>
+        <button class="btn func" id="btn-e"     data-value="e">e</button>
+
+        <!-- Row 4: Numbers + Operator -->
+        <button class="btn num"  id="btn-7" data-value="7">7</button>
+        <button class="btn num"  id="btn-8" data-value="8">8</button>
+        <button class="btn num"  id="btn-9" data-value="9">9</button>
+        <button class="btn op"   id="btn-div" data-value="/">÷</button>
+
+        <!-- Row 5 -->
+        <button class="btn num"  id="btn-4" data-value="4">4</button>
+        <button class="btn num"  id="btn-5" data-value="5">5</button>
+        <button class="btn num"  id="btn-6" data-value="6">6</button>
+        <button class="btn op"   id="btn-mul" data-value="*">×</button>
+
+        <!-- Row 6 -->
+        <button class="btn num"  id="btn-1" data-value="1">1</button>
+        <button class="btn num"  id="btn-2" data-value="2">2</button>
+        <button class="btn num"  id="btn-3" data-value="3">3</button>
+        <button class="btn op"   id="btn-sub" data-value="-">−</button>
+
+        <!-- Row 7 -->
+        <button class="btn func" id="btn-pct"  data-value="%">%</button>
+        <button class="btn num"  id="btn-0"    data-value="0">0</button>
+        <button class="btn func" id="btn-dot"  data-value="dot">.</button>
+        <button class="btn op"   id="btn-add"  data-value="+">+</button>
+
+        <!-- Row 8: Control -->
+        <button class="btn func" id="btn-neg"  data-value="neg">±</button>
+        <button class="btn func" id="btn-back" data-value="back">⌫</button>
+        <button class="btn clear" id="btn-clear" data-value="clear">C</button>
+        <button class="btn equals" id="btn-eq" data-value="=">=</button>
+
+      </div>
+    </div>
+
+  </div><!-- /app-wrapper -->
+
+  <!-- Scripts -->
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
