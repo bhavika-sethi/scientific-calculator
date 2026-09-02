@@ -1,0 +1,453 @@
+/* =========================================================
+   Scientific Calculator – Premium Dark Theme
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700&display=swap');
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-from:  #0f0c29;
+  --bg-mid:   #302b63;
+  --bg-to:    #24243e;
+
+  --glass-bg: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-shadow: rgba(0,0,0,0.45);
+
+  --accent:   #a78bfa;        /* violet */
+  --accent2:  #38bdf8;        /* sky blue */
+  --equals:   #4ade80;        /* green */
+  --danger:   #f87171;        /* red – clear */
+  --op-color: #fb923c;        /* orange – operators */
+  --num-color:#e2e8f0;        /* light – numbers */
+  --func-color:#c084fc;       /* purple – functions */
+
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --display-text:   #ffffff;
+
+  --btn-radius: 14px;
+  --transition: 0.2s ease;
+  --font: 'Inter', 'Outfit', sans-serif;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--font);
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-mid) 50%, var(--bg-to) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* Animated background orbs */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.25;
+  pointer-events: none;
+  animation: orb-float 8s ease-in-out infinite alternate;
+  z-index: 0;
+}
+body::before {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #7c3aed, transparent 70%);
+  top: -10%; left: -10%;
+}
+body::after {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #0ea5e9, transparent 70%);
+  bottom: -10%; right: -10%;
+  animation-delay: -4s;
+}
+
+@keyframes orb-float {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(40px, 40px) scale(1.15); }
+}
+
+/* ── App Wrapper ── */
+.app-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 420px;
+}
+
+header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.3px;
+}
+
+.auth-btn {
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 50px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+.auth-btn:hover {
+  background: rgba(167,139,250,0.18);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.auth-btn#logoutBtn {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.auth-btn#logoutBtn:hover { background: rgba(248,113,113,0.12); }
+
+/* User info tag */
+#userInfo {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Calculator Card ── */
+.calculator {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 60px var(--glass-shadow), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: slide-up 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes slide-up {
+  from { opacity:0; transform: translateY(40px) scale(0.95); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* ── Display ── */
+.display-wrapper {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 1rem 1.25rem 0.75rem;
+  margin-bottom: 1.25rem;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  overflow: hidden;
+}
+
+#history {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  min-height: 1.1rem;
+  word-break: break-all;
+  text-align: right;
+}
+
+#display {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--display-text);
+  font-family: 'Outfit', monospace;
+  font-size: 2.4rem;
+  font-weight: 300;
+  text-align: right;
+  width: 100%;
+  caret-color: var(--accent);
+  letter-spacing: -0.5px;
+}
+#display::placeholder { color: rgba(255,255,255,0.2); }
+
+/* Angle mode badge */
+#angleBadge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--accent2);
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 50px;
+  padding: 0.1rem 0.5rem;
+  letter-spacing: 0.5px;
+  align-self: flex-start;
+  text-transform: uppercase;
+}
+
+/* ── Button Grid ── */
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+
+/* ── Individual Buttons ── */
+button.btn {
+  position: relative;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--btn-radius);
+  padding: 0.85rem 0.5rem;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Ripple pseudo-element */
+button.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+button.btn:active::after { opacity: 1; }
+
+button.btn:hover  { transform: translateY(-2px) scale(1.04); }
+button.btn:active { transform: translateY(0) scale(0.96); }
+
+/* Number buttons */
+button.btn.num {
+  background: rgba(255,255,255,0.07);
+  color: var(--num-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+button.btn.num:hover { background: rgba(255,255,255,0.13); box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+
+/* Operator buttons */
+button.btn.op {
+  background: linear-gradient(145deg, rgba(251,146,60,0.2), rgba(251,146,60,0.08));
+  color: var(--op-color);
+  border-color: rgba(251,146,60,0.2);
+  box-shadow: 0 4px 12px rgba(251,146,60,0.1);
+}
+button.btn.op:hover { background: linear-gradient(145deg, rgba(251,146,60,0.35), rgba(251,146,60,0.15)); box-shadow: 0 6px 20px rgba(251,146,60,0.25); }
+
+/* Function buttons */
+button.btn.func {
+  background: linear-gradient(145deg, rgba(192,132,252,0.15), rgba(192,132,252,0.05));
+  color: var(--func-color);
+  border-color: rgba(192,132,252,0.18);
+  font-size: 0.82rem;
+  box-shadow: 0 4px 12px rgba(192,132,252,0.08);
+}
+button.btn.func:hover { background: linear-gradient(145deg, rgba(192,132,252,0.28), rgba(192,132,252,0.12)); box-shadow: 0 6px 20px rgba(192,132,252,0.2); }
+
+/* Equals button */
+button.btn.equals {
+  background: linear-gradient(145deg, #22c55e, #16a34a);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 24px rgba(34,197,94,0.35);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+button.btn.equals:hover { box-shadow: 0 8px 30px rgba(34,197,94,0.55); filter: brightness(1.08); }
+
+/* Clear button */
+button.btn.clear {
+  background: linear-gradient(145deg, rgba(248,113,113,0.25), rgba(248,113,113,0.1));
+  color: var(--danger);
+  border-color: rgba(248,113,113,0.25);
+  box-shadow: 0 4px 12px rgba(248,113,113,0.1);
+}
+button.btn.clear:hover { background: linear-gradient(145deg, rgba(248,113,113,0.4), rgba(248,113,113,0.2)); box-shadow: 0 6px 20px rgba(248,113,113,0.3); }
+
+/* ── LOGIN MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  background: linear-gradient(145deg, rgba(30,20,60,0.95), rgba(15,12,41,0.97));
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(167,139,250,0.08) inset;
+  transform: translateY(30px) scale(0.95);
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+.modal-overlay.open .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+/* Modal close */
+.modal-close {
+  position: absolute;
+  top: 1rem; right: 1.2rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color var(--transition), transform var(--transition);
+}
+.modal-close:hover { color: var(--danger); transform: rotate(90deg); }
+
+/* Modal header */
+.modal-card .modal-logo {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 1.2rem;
+  box-shadow: 0 8px 24px rgba(167,139,250,0.35);
+}
+
+.modal-card h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.3rem;
+}
+.modal-card .modal-sub {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.8rem;
+}
+
+/* Input fields */
+.input-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+.input-group .input-icon {
+  position: absolute;
+  left: 1rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  pointer-events: none;
+}
+.input-group input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 0.85rem 1rem 0.85rem 2.75rem;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.input-group input::placeholder { color: var(--text-secondary); }
+.input-group input:focus {
+  border-color: var(--accent);
+  background: rgba(167,139,250,0.06);
+  box-shadow: 0 0 0 3px rgba(167,139,250,0.18);
+}
+
+/* Login submit button */
+#loginSubmit {
+  width: 100%;
+  padding: 0.9rem;
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+  transition: filter var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+#loginSubmit:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(124,58,237,0.55);
+}
+#loginSubmit:active { transform: translateY(0); }
+
+/* Modal error/info message */
+#loginMsg {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  text-align: center;
+  min-height: 1.1rem;
+  color: var(--danger);
+}
+
+/* ── Utility ── */
+.hidden { display: none !important; }
+
+/* ── Responsive ── */
+@media (max-width: 440px) {
+  .calculator { padding: 1.1rem; border-radius: 20px; }
+  #display { font-size: 2rem; }
+  button.btn { padding: 0.75rem 0.3rem; font-size: 0.85rem; }
+  button.btn.func { font-size: 0.72rem; }
+}
